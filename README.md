@@ -11,6 +11,7 @@ This is a standalone Microservice (MSA Node) responsible for:
 - **Framework**: FastAPI
 - **Engine**: Typst (Must be installed in system path)
 - **Data**: Local filesystem (`downloads/`)
+- **Crawler Mode**: **Simulation Only** (Real site `schoolinfo.go.kr` blocks headless requests. Data is mocked for architectural verification.)
 
 ## Setup
 
@@ -30,6 +31,14 @@ This is a standalone Microservice (MSA Node) responsible for:
 python main.py
 ```
 The server will start at `http://localhost:8005`.
+
+## Real Browser Agent (Experimental)
+To bypass site blocks, use the Playwright-based agent:
+```bash
+playwright install
+python src/agent_crawler.py
+```
+*Note: This works best in a local environment with a headed browser.*
 
 ## API Endpoints
 - `GET /health`: Health check.
