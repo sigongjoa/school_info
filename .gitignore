@@ -1,0 +1,5 @@
+*.pdf
+__pycache__/
+*.pyc
+downloads/
+debug_artifacts/
