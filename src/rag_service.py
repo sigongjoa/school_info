@@ -8,46 +8,49 @@ from .models import SchoolData
 
 logger = logging.getLogger(__name__)
 
+from .rag.engine import RAGEngine
+
 class SchoolRAGService:
     """
     Service for RAG-based analysis of school documents.
-    Generates the 'Organized' qualitative report.
+    Uses RAGEngine for Retrieval and Generation.
     """
     def __init__(self):
-        self.doc_processor = DocumentProcessor()
+        # We might want to persist the engine or collection per school?
+        # For simplicity, we use one collection for now.
+        self.rag_engine = RAGEngine(collection_name="school_info_v1")
 
     async def summarize_school(self, school_data: SchoolData, docs: List[str]) -> str:
         """
-        Analyzes downloaded documents and returns a comprehensive summary.
-        Simulates AI latency to avoid "hardcoded" feel.
+        Ingests docs and generates a comprehensive summary using RAG.
+        Returns a JSON string (for compatibility with previous signature, though ideally should be Dict).
         """
         logger.info(f"Analyzing {len(docs)} documents for {school_data.school_name}...")
         
-        # 1. Extract Text
-        extracted_texts = []
-        for doc in docs:
-            text = self.doc_processor.extract_text(doc)
-            extracted_texts.append(text[:1000]) # truncated for demo
+        # 1. Ingest Documents
+        total_chunks = 0
+        for doc_path in docs:
+            # Check if file exists
+            if not os.path.exists(doc_path):
+                logger.warning(f"Document not found: {doc_path}")
+                continue
+                
+            count = self.rag_engine.ingest_file(
+                doc_path, 
+                metadata={"school_name": school_data.school_name, "year": "2025"}
+            )
+            total_chunks += count
+            
+        logger.info(f"Ingested {total_chunks} chunks.")
         
-        # 2. Simulate LLM latency (Real RAG takes 5-10s)
-        time.sleep(3) 
+        if total_chunks == 0:
+            return json.dumps({"error": "No content indexed", "answer": "문서를 분석할 수 없습니다."})
+
+        # 2. Query
+        query_text = f"{school_data.school_name}의 2025학년도 교육 목표, 주요 수학 평가 계획, 자유학기제 운영 방식을 요약해줘."
         
-        # 3. Generate "AI" Summary (Simulated for independent node, can plug into Ollama)
-        summary = f"""
-# {school_data.school_name} 2025 학년도 분석 보고서
-
-## 1. 교육 과정 특징
-{school_data.school_name}은(는) 학생 참여형 수업과 과정 중심 평가를 강조합니다.
-특히 1학년 자유학기제 운영을 통해 진로 탐색 활동을 강화하고 있습니다.
-
-## 2. 주요 문서 분석
-총 {len(docs)}건의 문서를 분석하였습니다.
-- **교수학습 계획**: 수학, 과학, 영어 교과의 융합 수업 모델이 제시됨.
-- **평가 규정**: 서술형 평가 비율이 작년 대비 10% 상향 조정됨.
-
-## 3. 종합 의견 (AI Generated)
-본 학교는 창의 융합 인재 양성을 목표로 체계적인 교육 과정을 운영하고 있습니다.
-학업 성취도 향상을 위한 방과후 지원 프로그램이 우수한 것으로 분석됩니다.
-        """
+        result = self.rag_engine.query(query_text, k=5)
         
-        return summary.strip()
+        # 3. Return Result
+        # API expects string, so we dump the JSON result
+        return json.dumps(result, ensure_ascii=False, indent=2)

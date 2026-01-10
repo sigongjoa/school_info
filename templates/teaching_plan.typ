@@ -72,6 +72,38 @@
   [상시], [수행평가], [40%], [포트폴리오, 주제 탐구 보고서]
 )
 
+// RAG Analysis Section
+#v(1cm)
+#text(size: 14pt, weight: "bold")[3. AI 분석 요약 (RAG)]
+#v(0.5cm)
+#block(
+  fill: luma(245),
+  inset: 15pt,
+  radius: 5pt,
+  stroke: 0.5pt + gray,
+  width: 100%,
+  [
+    #set text(size: 10pt)
+    #if data.keys().contains("rag_analysis") [
+      #data.rag_analysis
+    ] else [
+      *데이터 분석 중입니다.*
+    ]
+  ]
+)
+
+// Chart Section
+#v(1cm)
+#text(size: 14pt, weight: "bold")[4. 평가 비율 분석 (시각화)]
+#v(0.5cm)
+#align(center)[
+  #if data.keys().contains("chart_image_path") [
+    #image(data.chart_image_path, width: 80%)
+  ] else [
+    *시각화 데이터가 없습니다.*
+  ]
+]
+
 #v(2cm)
 #align(right)[
   *2025년 03월 02일* \
