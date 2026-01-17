@@ -1,0 +1,42 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "node6-school-info"
+version = "0.1.0"
+description = "School Info - School information crawling and RAG system"
+requires-python = ">=3.10"
+dependencies = [
+    "fastapi>=0.103.0",
+    "uvicorn>=0.23.2",
+    "httpx>=0.24.1",
+    "beautifulsoup4>=4.12.2",
+    "lxml>=4.9.3",
+    "pydantic>=2.3.0",
+    "pdfplumber>=0.10.0",
+]
+
+[project.optional-dependencies]
+test = [
+    "pytest>=7.4.0",
+    "pytest-asyncio>=0.21.0",
+    "pytest-cov>=4.1.0",
+    "pytest-mock>=3.10.0",
+]
+dev = [
+    "black",
+    "isort",
+    "mypy",
+    "ruff",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["src*"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+testpaths = ["tests"]
+addopts = "-v --cov --cov-report=term-missing --cov-fail-under=100"
